@@ -1,0 +1,48 @@
+FROM php:8.2.5-cli-alpine3.17
+
+LABEL maintainer="AChang"
+
+#    && apk install -y libpq-dev libzip-dev zip zlib1g-dev libjpeg-dev libpng-dev  \
+
+RUN apk update && apk add --no-cache \
+    git \
+    autoconf \
+    g++ \
+    make \
+    openssl-dev \
+    curl \
+    curl-dev \
+    zip \
+    unzip \
+    zlib-dev \
+    libzip-dev \
+    oniguruma-dev
+
+ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
+
+RUN chmod +x /usr/local/bin/install-php-extensions \
+    && install-php-extensions swoole \
+    && install-php-extensions pcntl \
+    && install-php-extensions sockets \
+    && install-php-extensions zip  \
+    && install-php-extensions gd \
+    && install-php-extensions igbinary \
+    && install-php-extensions redis \
+    && install-php-extensions opcache \
+    && install-php-extensions bcmath \
+    && install-php-extensions imagick \
+    && install-php-extensions exif \
+    && install-php-extensions pdo \
+    && install-php-extensions pgsql \
+    && install-php-extensions pdo_pgsql \
+    && install-php-extensions pdo_mysql \
+    && install-php-extensions simdjson
+
+COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
+
+#EXPOSE 8000
+#bcmath, bz2, calendar, Core, ctype, curl, date, dba, dom, exif, FFI, fileinfo, filter, ftp, gd, gettext, gmp, hash, iconv,
+# igbinary, intl, json, ldap, libxml, mbstring, mysqli, mysqlnd, odbc, openssl, pcntl, pcre, PDO, pdo_dblib, pdo_mysql,
+# PDO_ODBC, pdo_pgsql, pdo_sqlite, pgsql, Phar, posix, pspell, random, readline, redis, Reflection, session, shmop, simdjson,
+#  SimpleXML, soap, sockets, sodium, SPL, sqlite3, standard, swoole, sysvmsg, sysvsem, sysvshm, tidy, tokenizer, xlswriter,
+#   xml, xmlreader, xmlwriter, xsl, Zend OPcache, zip, zlib
