@@ -70,8 +70,8 @@ services:
       TZ: 'Asia/Shanghai'
       explicit_defaults_for_timestamp: true
       lower_case_table_names: 1
-      MYSQL_ROOT_PASSWORD: 'fuck123sql'
-      MYSQL_ROOT_HOST: '%'
+      #      MYSQL_ROOT_PASSWORD: 'fuck123sql'
+      #      MYSQL_ROOT_HOST: '%'
       MYSQL_MAX_CONNECTIONS: 200
     user: root
     ports:
