@@ -44,14 +44,13 @@ services:
   #      - mysql
 
   redis:
-    image: redis/redis-stack:6.2.6-v6
+    image: redis/redis-stack:7.2.0-RC2-arm64
     restart: always
     ports:
       - "16379:6379"
       - "18001:8001"
     networks:
       app_net:
-        ipv4_address: 172.10.12.130
     environment:
       - TZ=Asia/Shanghai
 
@@ -70,7 +69,7 @@ services:
       TZ: 'Asia/Shanghai'
       explicit_defaults_for_timestamp: true
       lower_case_table_names: 1
-      #      MYSQL_ROOT_PASSWORD: 'fuck123sql'
+      MYSQL_ROOT_PASSWORD: 'fuck123sql'
       #      MYSQL_ROOT_HOST: '%'
       MYSQL_MAX_CONNECTIONS: 200
     user: root
@@ -78,7 +77,7 @@ services:
       - "13306:3306"
     networks:
       app_net:
-        ipv4_address: 172.10.12.170
+        ipv4_address: 172.18.18.188
 
   rabbitmq:
     image: rabbitmq:3.11.13-management-alpine
@@ -101,7 +100,30 @@ services:
         hard: 111111
     networks:
       app_net:
-        ipv4_address: 172.10.12.122
+
+  nacos:
+    image: nacos/nacos-server:v2.2.3-slim
+    volumes:
+      - ./data/nacos/logs:/home/nacos/logs
+      - ./data/nacos/init.d:/home/nacos/init.d
+    environment:
+      - PREFER_HOST_MODE=hostname
+      - MODE=standalone
+      - SPRING_DATASOURCE_PLATFORM=172.18.18.188
+      - MYSQL_SERVICE_HOST=mysql
+      - MYSQL_SERVICE_PORT=3306
+      - MYSQL_SERVICE_USER=root
+      - MYSQL_SERVICE_PASSWORD=fuck123sql
+      - MYSQL_SERVICE_DB_NAME=nmb
+      - MYSQL_DATABASE_NUM=1
+      - MYSQL_SERVICE_DB_PARAM=useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=utf8&allowMultiQueries=true
+    ports:
+      - "8848:8848"
+    depends_on:
+      - mysql
+    networks:
+      app_net:
+        ipv4_address: 172.18.18.111
 
 volumes:
   es_data:
@@ -112,4 +134,4 @@ networks:
     ipam:
       driver: default
       config:
-        - subnet: 172.10.12.0/16
+        - subnet: 172.18.18.0/24
