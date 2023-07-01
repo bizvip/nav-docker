@@ -103,6 +103,31 @@ services:
       app_net:
         ipv4_address: 172.10.12.122
 
+  etcd:
+    image: quay.io/coreos/etcd:v3.5.8
+    environment:
+      - TZ=Asia/Shanghai
+    command:
+      - /usr/local/bin/etcd
+      - --name
+      - nav-etcd-1
+      - --data-dir
+      - ./data/etcd-data
+      - --listen-client-urls
+      - http://0.0.0.0:2379
+      - --advertise-client-urls
+      - http://0.0.0.0:2379
+      - --listen-peer-urls
+      - http://0.0.0.0:2380
+      - --initial-advertise-peer-urls
+      - http://0.0.0.0:2380
+      - --initial-cluster
+      - nav-etcd-1=http://0.0.0.0:2380
+      - --initial-cluster-token
+      - nav-etcd-token
+      - --initial-cluster-state
+      - new
+
 volumes:
   es_data:
     driver: local
