@@ -101,54 +101,86 @@ services:
     networks:
       app_net:
 
-  nacos:
-    image: nacos/nacos-server:v2.2.3-slim
-    volumes:
-      - ./data/nacos/logs:/home/nacos/logs
-      - ./data/nacos/init.d:/home/nacos/init.d
+  #  nacos:
+  #    image: nacos/nacos-server:v2.2.3-slim
+  #    volumes:
+  #      - ./data/nacos/logs:/home/nacos/logs
+  #      - ./data/nacos/init.d:/home/nacos/init.d
+  #    environment:
+  #      - PREFER_HOST_MODE=hostname
+  #      - MODE=standalone
+  ##      - SPRING_DATASOURCE_PLATFORM=embedded
+  ##      - MYSQL_SERVICE_HOST=172.18.18.188
+  ##      - MYSQL_SERVICE_PORT=13306
+  ##      - MYSQL_SERVICE_USER=root
+  ##      - MYSQL_SERVICE_PASSWORD=fuck123sql
+  ##      - MYSQL_SERVICE_DB_NAME=nacos
+  ##      - MYSQL_DATABASE_NUM=1
+  ##      - MYSQL_SERVICE_DB_PARAM=useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=utf8&allowMultiQueries=true
+  #    ports:
+  #      - "8848:8848"
+  #    depends_on:
+  #      - mysql
+  #    networks:
+  #      app_net:
+  #        ipv4_address: 172.18.18.111
+
+  #  etcd:
+  #    image: quay.io/coreos/etcd:v3.5.8
+  #    environment:
+  #      - TZ=Asia/Shanghai
+  #    command:
+  #      - /usr/local/bin/etcd
+  #      - --name
+  #      - nav-etcd-1
+  #      - --data-dir
+  #      - ./data/etcd-data
+  #      - --listen-client-urls
+  #      - http://0.0.0.0:2379
+  #      - --advertise-client-urls
+  #      - http://0.0.0.0:2379
+  #      - --listen-peer-urls
+  #      - http://0.0.0.0:2380
+  #      - --initial-advertise-peer-urls
+  #      - http://0.0.0.0:2380
+  #      - --initial-cluster
+  #      - nav-etcd-1=http://0.0.0.0:2380
+  #      - --initial-cluster-token
+  #      - nav-etcd-token
+  #      - --initial-cluster-state
+  #      - new
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.8.0
     environment:
-      - PREFER_HOST_MODE=hostname
-      - MODE=standalone
-      - SPRING_DATASOURCE_PLATFORM=172.18.18.188
-      - MYSQL_SERVICE_HOST=mysql
-      - MYSQL_SERVICE_PORT=3306
-      - MYSQL_SERVICE_USER=root
-      - MYSQL_SERVICE_PASSWORD=fuck123sql
-      - MYSQL_SERVICE_DB_NAME=nmb
-      - MYSQL_DATABASE_NUM=1
-      - MYSQL_SERVICE_DB_PARAM=useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=utf8&allowMultiQueries=true
+      - discovery.type=single-node
+      - ELASTICSEARCH_SECURITY_ENABLED=false
+      - http.max_content_length=1gb
+      - http.max_initial_line_length=16k
+      - http.max_header_size=8kb
+      - http.max_chunk_size=512mb
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - ./data/es-data:/usr/share/elasticsearch/data
     ports:
-      - "8848:8848"
-    depends_on:
-      - mysql
+      - "19200:9200"
+      - "19300:9300"
     networks:
       app_net:
-        ipv4_address: 172.18.18.111
 
-#  etcd:
-#    image: quay.io/coreos/etcd:v3.5.8
-#    environment:
-#      - TZ=Asia/Shanghai
-#    command:
-#      - /usr/local/bin/etcd
-#      - --name
-#      - nav-etcd-1
-#      - --data-dir
-#      - ./data/etcd-data
-#      - --listen-client-urls
-#      - http://0.0.0.0:2379
-#      - --advertise-client-urls
-#      - http://0.0.0.0:2379
-#      - --listen-peer-urls
-#      - http://0.0.0.0:2380
-#      - --initial-advertise-peer-urls
-#      - http://0.0.0.0:2380
-#      - --initial-cluster
-#      - nav-etcd-1=http://0.0.0.0:2380
-#      - --initial-cluster-token
-#      - nav-etcd-token
-#      - --initial-cluster-state
-#      - new
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.8.0
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "15601:5601"
+    depends_on:
+      - elasticsearch
+    networks:
+      app_net:
 
 volumes:
   es_data:
