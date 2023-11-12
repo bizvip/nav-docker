@@ -1,6 +1,71 @@
 version: "3.9"
 
 services:
+  # 省略了已注释掉的服务部分
+
+  redis:
+    image: redis/redis-stack:7.2.0-v6-arm64
+    restart: always
+    ports:
+      - "6379:6379"
+      - "8001:8001"
+    networks:
+      - app_net
+    environment:
+      - TZ=Asia/Shanghai
+
+  mysql:
+    image: bitnami/mysql
+    volumes:
+      - ./mysql/bitnami.my.cnf:/opt/bitnami/mysql/conf/my.cnf
+      - ./data/mysql-data:/bitnami/mysql/data
+    restart: always
+    environment:
+      - TZ=Asia/Shanghai
+      - explicit_defaults_for_timestamp=true
+      - lower_case_table_names=1
+      - MYSQL_ROOT_PASSWORD=fuck123sql
+      - MYSQL_MAX_CONNECTIONS=200
+    user: root
+    ports:
+      - "3306:3306"
+    networks:
+      - app_net
+
+  rabbitmq:
+    image: bitnami/rabbitmq:3.11.25
+    hostname: rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+      - RABBITMQ_DEFAULT_VHOST=/
+      - RABBITMQ_ERLANG_COOKIE=nav_rc
+      - TZ=Asia/Shanghai
+    volumes:
+      - ./data/rabbitmq-data:/var/lib/rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    restart: unless-stopped
+    ulimits:
+      nofile:
+        soft: 111111
+        hard: 111111
+    networks:
+      - app_net
+
+volumes:
+  es_data:
+    driver: local
+
+networks:
+  app_net:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.19.1.0/24
+
+
   #  nginx:
   #    build:
   #      context: .
@@ -43,63 +108,6 @@ services:
   #      - redis
   #      - mysql
 
-  redis:
-    image: redis/redis-stack:7.2.0-v6-arm64
-    restart: always
-    ports:
-      - "16379:6379"
-      - "18001:8001"
-    networks:
-      app_net:
-    environment:
-      - TZ=Asia/Shanghai
-
-  #  CREATE USER 'root'@'%' IDENTIFIED BY 'fuck123sql';
-  #  GRANT ALL PRIVILEGES ON *.* TO 'root'@'%';
-  #  FLUSH PRIVILEGES;
-  mysql:
-    image: bitnami/mysql:8.0.28
-    volumes:
-      #      - ./mysql/my.cnf:/etc/my.cnf
-      #      - ./mysql/mysql-data:/var/lib/mysql
-      - ./mysql/bitnami.my.cnf:/opt/bitnami/mysql/conf/my.cnf
-      - ./data/mysql-data:/bitnami/mysql/data
-    restart: always
-    environment:
-      TZ: 'Asia/Shanghai'
-      explicit_defaults_for_timestamp: true
-      lower_case_table_names: 1
-      MYSQL_ROOT_PASSWORD: 'fuck123sql'
-      #      MYSQL_ROOT_HOST: '%'
-      MYSQL_MAX_CONNECTIONS: 200
-    user: root
-    ports:
-      - "13306:3306"
-    networks:
-      app_net:
-        ipv4_address: 172.18.18.188
-
-  rabbitmq:
-    image: bitnami/rabbitmq:3.11.25
-    hostname: rabbitmq
-    environment:
-      - RABBITMQ_DEFAULT_USER=guest
-      - RABBITMQ_DEFAULT_PASS=guest
-      - RABBITMQ_DEFAULT_VHOST=/
-      - RABBITMQ_ERLANG_COOKIE=nav_rc
-      - TZ=Asia/Shanghai
-    volumes:
-      - ./data/rabbitmq-data:/var/lib/rabbitmq
-    ports:
-      - "25672:5672"
-      - "35672:15672"
-    restart: unless-stopped
-    ulimits:
-      nofile:
-        soft: 111111
-        hard: 111111
-    networks:
-      app_net:
 
   #  nacos:
   #    image: nacos/nacos-server:v2.2.3-slim
@@ -110,7 +118,7 @@ services:
   #      - PREFER_HOST_MODE=hostname
   #      - MODE=standalone
   ##      - SPRING_DATASOURCE_PLATFORM=embedded
-  ##      - MYSQL_SERVICE_HOST=172.18.18.188
+  ##      - MYSQL_SERVICE_HOST=172.19.1.188
   ##      - MYSQL_SERVICE_PORT=13306
   ##      - MYSQL_SERVICE_USER=root
   ##      - MYSQL_SERVICE_PASSWORD=fuck123sql
@@ -123,7 +131,7 @@ services:
   #      - mysql
   #    networks:
   #      app_net:
-  #        ipv4_address: 172.18.18.111
+  #        ipv4_address: 172.19.1.111
 
   #  etcd:
   #    image: quay.io/coreos/etcd:v3.5.8
@@ -181,14 +189,3 @@ services:
 #      - elasticsearch
 #    networks:
 #      app_net:
-
-volumes:
-  es_data:
-    driver: local
-
-networks:
-  app_net:
-    ipam:
-      driver: default
-      config:
-        - subnet: 172.18.18.0/24
