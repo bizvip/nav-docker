@@ -33,13 +33,13 @@ services:
       - app_net
 
   rabbitmq:
-    image: bitnami/rabbitmq:3.11.25
+    image: rabbitmq:3.12.8-management
     hostname: rabbitmq
     environment:
       - RABBITMQ_DEFAULT_USER=guest
       - RABBITMQ_DEFAULT_PASS=guest
       - RABBITMQ_DEFAULT_VHOST=/
-      - RABBITMQ_ERLANG_COOKIE=nav_rc
+      - RABBITMQ_ERLANG_COOKIE=amqpnavguest
       - TZ=Asia/Shanghai
     volumes:
       - ./data/rabbitmq-data:/var/lib/rabbitmq
