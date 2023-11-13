@@ -1,7 +1,6 @@
 version: "3.9"
 
 services:
-  # 省略了已注释掉的服务部分
 
   redis:
     image: redis/redis-stack:7.2.0-v6-arm64
@@ -10,7 +9,7 @@ services:
       - "6379:6379"
       - "8001:8001"
     networks:
-      - app_net
+      - nav_net
     environment:
       - TZ=Asia/Shanghai
 
@@ -30,7 +29,7 @@ services:
     ports:
       - "3306:3306"
     networks:
-      - app_net
+      - nav_net
 
   rabbitmq:
     image: rabbitmq:3.12.8-management
@@ -39,7 +38,7 @@ services:
       - RABBITMQ_DEFAULT_USER=guest
       - RABBITMQ_DEFAULT_PASS=guest
       - RABBITMQ_DEFAULT_VHOST=/
-      - RABBITMQ_ERLANG_COOKIE=amqpnavguest
+      - RABBITMQ_ERLANG_COOKIE=_rmq_g
       - TZ=Asia/Shanghai
     volumes:
       - ./data/rabbitmq-data:/var/lib/rabbitmq
@@ -52,18 +51,18 @@ services:
         soft: 111111
         hard: 111111
     networks:
-      - app_net
+      - nav_net
 
 volumes:
   es_data:
     driver: local
 
 networks:
-  app_net:
+  nav_net:
     ipam:
       driver: default
       config:
-        - subnet: 172.19.1.0/24
+        - subnet: 172.34.1.0/24
 
 
   #  nginx:
@@ -74,7 +73,7 @@ networks:
   #      - "TIMEZONE=Asia/Shanghai"
   #    restart: always
   #    networks:
-  #      app_net:
+  #      nav_net:
   #        ipv4_address: 172.10.12.100
   #    ports:
   #      - "8011:80"
@@ -101,7 +100,7 @@ networks:
   #      - "9501:9501"
   #      - "9502:9502"
   #    networks:
-  #      app_net:
+  #      nav_net:
   #        ipv4_address: 172.10.12.120
   #    command: [ "php","/app/bin/run","start" ]
   #    depends_on:
@@ -130,7 +129,7 @@ networks:
   #    depends_on:
   #      - mysql
   #    networks:
-  #      app_net:
+  #      nav_net:
   #        ipv4_address: 172.19.1.111
 
   #  etcd:
@@ -177,7 +176,7 @@ networks:
 #      - "19200:9200"
 #      - "19300:9300"
 #    networks:
-#      app_net:
+#      nav_net:
 #
 #  kibana:
 #    image: docker.elastic.co/kibana/kibana:8.8.0
@@ -188,4 +187,4 @@ networks:
 #    depends_on:
 #      - elasticsearch
 #    networks:
-#      app_net:
+#      nav_net:
